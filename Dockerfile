@@ -37,12 +37,9 @@ RUN apt-get update && \
     awscli && \
     rm -rf /var/lib/apt/lists/*
 
-RUN mkdir -p /CLIProxyAPI
-RUN mkdir -p /CPA-DATA/auth
-RUN mkdir -p /CPA-DATA/plugins
+RUN mkdir -p /CLIProxyAPI /CPA-DATA
 
 COPY --from=builder /app/CLIProxyAPI /CLIProxyAPI/CLIProxyAPI
-
 COPY config.example.yaml /CLIProxyAPI/config.example.yaml
 
 COPY docker-entrypoint.sh /docker-entrypoint.sh
@@ -52,7 +49,7 @@ WORKDIR /CLIProxyAPI
 
 EXPOSE 8317
 
-ENV TZ=Asia/Bangkok
+ENV TZ=Asia/Shanghai
 
 RUN cp /usr/share/zoneinfo/${TZ} /etc/localtime && \
     echo "${TZ}" > /etc/timezone
