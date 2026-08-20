@@ -2,7 +2,11 @@ FROM golang:1.26-bookworm AS builder
 
 WORKDIR /app
 
-RUN apt-get update && apt-get install -y --no-install-recommends build-essential git && rm -rf /var/lib/apt/lists/*
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends \
+    build-essential \
+    git && \
+    rm -rf /var/lib/apt/lists/*
 
 COPY go.mod go.sum ./
 
@@ -14,7 +18,15 @@ ARG VERSION=dev
 ARG COMMIT=none
 ARG BUILD_DATE=unknown
 
-RUN CGO_ENABLED=1 GOOS=linux go build -buildvcs=false -ldflags="-s -w -X 'main.Version=${VERSION}' -X 'main.Commit=${COMMIT}' -X 'main.BuildDate=${BUILD_DATE}'" -o ./CLIProxyAPI ./cmd/server/
+RUN CGO_ENABLED=1 GOOS=linux go build \
+    -buildvcs=false \
+    -ldflags="-s -w \
+    -X 'main.Version=${VERSION}' \
+    -X 'main.Commit=${COMMIT}' \
+    -X 'main.BuildDate=${BUILD_DATE}'" \
+    -o ./CLIProxyAPI \
+    ./cmd/server/
+
 
 FROM debian:bookworm
 
@@ -26,11 +38,12 @@ RUN apt-get update && \
     rm -rf /var/lib/apt/lists/*
 
 RUN mkdir -p /CLIProxyAPI
-RUN mkdir -p /root/.cli-proxy-api
+RUN mkdir -p /CPA-DATA/auth
+RUN mkdir -p /CPA-DATA/plugins
 
 COPY --from=builder /app/CLIProxyAPI /CLIProxyAPI/CLIProxyAPI
 
-COPY config.example.yaml /CLIProxyAPI/config.yaml
+COPY config.example.yaml /CLIProxyAPI/config.example.yaml
 
 COPY docker-entrypoint.sh /docker-entrypoint.sh
 RUN chmod +x /docker-entrypoint.sh
