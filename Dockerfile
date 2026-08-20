@@ -39,17 +39,9 @@ WORKDIR /CLIProxyAPI
 
 EXPOSE 8317
 
-ENV TZ=Asia/Shanghai
+ENV TZ=Asia/Bangkok
 
 RUN cp /usr/share/zoneinfo/${TZ} /etc/localtime && \
     echo "${TZ}" > /etc/timezone
 
 ENTRYPOINT ["/docker-entrypoint.sh"]
-
-EXPOSE 8317
-
-ENV TZ=Asia/Shanghai
-
-RUN cp /usr/share/zoneinfo/${TZ} /etc/localtime && echo "${TZ}" > /etc/timezone
-
-CMD ["./CLIProxyAPI"]
