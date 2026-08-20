@@ -18,15 +18,33 @@ RUN CGO_ENABLED=1 GOOS=linux go build -buildvcs=false -ldflags="-s -w -X 'main.V
 
 FROM debian:bookworm
 
-RUN apt-get update && apt-get install -y --no-install-recommends tzdata ca-certificates && rm -rf /var/lib/apt/lists/*
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends \
+    tzdata \
+    ca-certificates \
+    awscli && \
+    rm -rf /var/lib/apt/lists/*
 
-RUN mkdir /CLIProxyAPI
+RUN mkdir -p /CLIProxyAPI
+RUN mkdir -p /root/.cli-proxy-api
 
-COPY --from=builder ./app/CLIProxyAPI /CLIProxyAPI/CLIProxyAPI
+COPY --from=builder /app/CLIProxyAPI /CLIProxyAPI/CLIProxyAPI
 
 COPY config.example.yaml /CLIProxyAPI/config.yaml
 
+COPY docker-entrypoint.sh /docker-entrypoint.sh
+RUN chmod +x /docker-entrypoint.sh
+
 WORKDIR /CLIProxyAPI
+
+EXPOSE 8317
+
+ENV TZ=Asia/Shanghai
+
+RUN cp /usr/share/zoneinfo/${TZ} /etc/localtime && \
+    echo "${TZ}" > /etc/timezone
+
+ENTRYPOINT ["/docker-entrypoint.sh"]
 
 EXPOSE 8317
 
